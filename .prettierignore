@@ -1,0 +1,2 @@
+# Don't format html, they are actually markdown
+*.html
