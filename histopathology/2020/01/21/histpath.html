@@ -77,7 +77,7 @@ window.onload = wrap_img;
        • <span class="read-time" title="Estimated read time">
     
     
-      5 min read
+      6 min read
     
 </span></p>
 
@@ -180,17 +180,25 @@ window.onload = wrap_img;
 
 <p><img src="/histpath/images/histpath/limit_bboxes.png" alt="" title="Cutting excessive bounding boxes" /></p>
 
-<p>In order for the model to generalize and achieve better performance image augmentations were used in training process. <a href="http://albumentations.ai/">Albumentations</a> library was used in order to distort the original images. Image <a href="https://github.com/albumentations-team/albumentations/blob/a3f40853b33de19f8c64f5d977190a6cdd0c786c/albumentations/augmentations/transforms.py#L573-L605">normalization</a> values (channels mean and std) were calculated for training and test set and used during training. Also <a href="https://github.com/albumentations-team/albumentations/blob/a3f40853b33de19f8c64f5d977190a6cdd0c786c/albumentations/augmentations/transforms.py#L1635-L1677">RandomBrightnessContrast</a> and <a href="https://github.com/albumentations-team/albumentations/blob/a3f40853b33de19f8c64f5d977190a6cdd0c786c/albumentations/augmentations/transforms.py#L1414-L1457">HueSaturationValue</a> transforms were used with default parameters.</p>
+<p>In order for the model to generalize and achieve better performance image augmentations were used in training process. <a href="http://albumentations.ai/">Albumentations</a> library was used in order to distort the original images. The training images transforms consisted of <a href="https://github.com/albumentations-team/albumentations/blob/master/albumentations/augmentations/transforms.py#L288">Flipping</a>, <a href="https://github.com/albumentations-team/albumentations/blob/a3f40853b33de19f8c64f5d977190a6cdd0c786c/albumentations/augmentations/transforms.py#L1635-L1677">RandomBrightnessContrast</a>, <a href="https://github.com/albumentations-team/albumentations/blob/a3f40853b33de19f8c64f5d977190a6cdd0c786c/albumentations/augmentations/transforms.py#L1414-L1457">HueSaturationValue</a> augmentations and <a href="https://github.com/albumentations-team/albumentations/blob/master/albumentations/augmentations/transforms.py#L1993">CLAHE</a> or <a href="https://github.com/albumentations-team/albumentations/blob/master/albumentations/augmentations/transforms.py#L2466">FancyPCA</a> augmentations.</p>
 
-<p><img src="/histpath/images/histpath/heavy_augmentations.png" alt="" title="Heavy augmentation of training images" /></p>
+<p><img src="/histpath/images/histpath/augmentations.png" alt="" title="Augmentation of training images" /></p>
 
 <h3 id="training">Training</h3>
 
 <p>Model was trained on the Tartu University <a href="https://hpc.ut.ee/en/home/">HPC</a> (High Performance Computing Center) using NVIDIA Tesla V100 GPU.</p>
 
+<h3 id="using-images-from-different-levels">Using images from different levels</h3>
+
+<p>After implementing the first model with only level 1 (the layer with largest dimensions) images it seemed that the model might improve by seeing cells from different height as human does when annotating different cell types. The level 1 image might provide higher details on how the exact cell looks and how to distinguish between different cells, but the higher level images might provide overview regarding cell positioning, detection etc.</p>
+
+<p><img src="/histpath/images/histpath/scaling_layers.png" alt="" title="Images from different levels" /></p>
+
+<p>Taking images from different levels meant also that the bounding boxes of level 1 annotations needed to be scaled accordingly. As each level were scaled to cover twice the dimension of previous level, then using images above level 3 seemed to be not effective as the annotations got smaller and smaller.</p>
+
 <h2 id="validation">Validation</h2>
 
-<h3 id="non-max-suppression">Non-Max Suppression</h3>
+<h3 id="eliminating-predictions">Eliminating predictions</h3>
 
 <p>Non-Max Suppression is a technique to filter the predictions of object detections. The idea of the Non-Max Suppression is to keep the highest scoring bounding box for a single detection. The IOU (intersection over union) of two bounding boxes is calculated to determine the boxes that overlap and lowest scoring boxes are dropped. This can reduce the predictions noise quite a lot as can be seen in the following image.</p>
 
@@ -200,8 +208,10 @@ window.onload = wrap_img;
 Mainly, I have to improve model performance.
 Current issues:
 - model detects cells very well but can't distinguish between different types
-- augmentations maybe too heavy
-- try to use also lvl 2, 3, 4, 5 images for training
+- The slides are not fully annotated and only some cells on the slides are.
+  This creates a situation where cells are found, but as all of them are not annotated
+  they are considered falsy. This allows model to find cells but not distinguish
+  between different types.
 </code></pre></div></div>
 
 <h2 id="conclusion">Conclusion</h2>
