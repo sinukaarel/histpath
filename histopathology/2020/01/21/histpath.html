@@ -101,29 +101,29 @@ window.onload = wrap_img;
 
 <h2 id="wsi-and-mirax-format">WSI and MIRAX format</h2>
 
-<p>Training images WSI (whole slide image) come in MIRAX format - a special kind of virtual slide format. Virtual slide is a high-resolution digital image of the microscopy sample that is created by sliding the glass past the camera and taking multiple pictures.</p>
+<p>Training images WSI (whole slide image) come in MIRAX format - a special kind of virtual slide format. A virtual slide is a high-resolution digital image of the microscopy sample created by sliding the glass past the camera and taking multiple pictures.</p>
 
-<p>These created images are too high-resolution to practically handle as image tiles and are broken up into multiple files. This kind of processing needs special notation and a system in order to view and access data after storage.</p>
+<p>These created images are too high-resolution to handle as full images and are broken up into multiple files. This kind of processing needs special notation and a system to view and access data after storage.</p>
 
 <p>On disk the format includes:</p>
 
 <ul>
   <li><code class="language-plaintext highlighter-rouge">.mrxs</code> file that holds the <strong>metadata</strong> including information on how <code class="language-plaintext highlighter-rouge">.dat</code> files are organized</li>
   <li>data folder with <code class="language-plaintext highlighter-rouge">.dat</code> files that hold the actual <strong>image data</strong></li>
-  <li><code class="language-plaintext highlighter-rouge">Index.dat</code> file in data folder that holds the <strong>pointers</strong> to locate the image data</li>
+  <li><code class="language-plaintext highlighter-rouge">Index.dat</code> file in the data folder that holds the <strong>pointers</strong> to locate the image data</li>
   <li><code class="language-plaintext highlighter-rouge">.json</code> <strong>annotation</strong> file in JSON format that holds the metadata for the annotated section of the image</li>
-  <li><code class="language-plaintext highlighter-rouge">Slidedat.ini</code> file in data folder that contains structural data and <strong>parameters of the scanning process</strong> in <code class="language-plaintext highlighter-rouge">key=value</code> format. These values are also used in order to receive image data.</li>
+  <li><code class="language-plaintext highlighter-rouge">Slidedat.ini</code> file in the data folder contains structural data and <strong>parameters of the scanning process</strong> in <code class="language-plaintext highlighter-rouge">key=value</code> format. These values are also used to receive image data.</li>
 </ul>
 
 <h3 id="example-of-a-single-slide">Example of a single slide</h3>
 
-<p>This is a an example of a single training slide. The WSI image has 10 different levels with each level becoming less detailed as the level grows. In this case LVL 10 is the top most layer and the one that has the smallest dimensions and can be used only for thumbnail. The LVL 1 is the lowest layer and has highest dimensions and is most precise. Another factor to consider is that actually most of the image is empty, only proportion of it is actual tissue as can be seen from the LVL 10 image.</p>
+<p>This is an example of a single training slide. The WSI image has ten different levels, with each layer becoming less detailed as the level grows. In this case, LVL 10 is the topmost layer and the one that has the smallest dimensions. The last layer can only be used for the image thumbnail. The LVL 1 is the lowest layer and has the highest dimensions. Also, this layer is the most precise. Another factor to consider is that most of the image is empty. Only a proportion of it is actual tissue, as can be seen from the LVL 10 image.</p>
 
 <p><img src="/histpath/images/histpath/example_slide.png" alt="" title="Example of a single slide structure" /></p>
 
 <h3 id="training-dataset">Training dataset</h3>
 
-<p>Training dataset consist of 4 WSI slides and each slide has 200 annotations. These annotated cells are different stages of spermatozoid life cycle and based of their proportions, one can diagnose infertility.</p>
+<p>The training dataset consists of 4 WSI slides, and each slide has 200 annotations. These annotated cells are at different stages of the spermatozoid life cycle. Based on their proportions, one can diagnose infertility.</p>
 
 <table>
   <thead>
@@ -158,25 +158,25 @@ window.onload = wrap_img;
 
 <h2 id="downscaling-images">Downscaling images</h2>
 
-<p>As the whole-slide images are too big to process it is required to downscale the whole image into smaller tiles. This required to scan the slide with user selected tile size and then collect annotation data if any existed for that tile. Annotated cell center point was used to determine if the cell is on the tile or not. Tiles images were saved and a annotations for the images were saved in <a href="https://cocodataset.org/#format-data">COCO</a> format for easier processing. COCO format is something that could be used as an input for different models and frameworks and makes model/framework changing a lot easier if required.</p>
+<p>As the whole-slide images are too big to process, it was required to downscale the image into smaller tiles. For achieving smaller annotated images, the WSI was scanned with user-selected tile size. Then, annotations were collected for that tile, if any existed. The annotated cell center point was used to determine if the cell is on the tile or not. Finally, tiles and collected annotations were saved. I converted the original annotations into the <a href="https://cocodataset.org/#format-data">COCO</a> format for easier processing. COCO format could be used as an input for different models and frameworks and makes model/framework changing a lot easier if required.</p>
 
 <h3 id="fiftyone-dataset-visualization">FiftyOne dataset visualization</h3>
 
-<p>To get a better overview of the annotation correctness and insights of the data <a href="https://voxel51.com/">FiftyOne</a> was used. This is a great solution for dataset and model predictions visualization and finding mistakes in annotated images. Good overview of training dataset and prediction visualization help to understand insights of trained model much better. Some of the training images had many annotations, but there were images where only a singe annotated cell was visible.</p>
+<p>To get a better overview of the annotation correctness and insights of the data <a href="https://voxel51.com/">FiftyOne</a> was used. FiftyOne is a great solution for dataset and model predictions visualization and finding mistakes in annotated images. Good overview of training dataset and prediction visualization help to understand insights of trained model much better. Some of the training images had many annotations, but there were images where only a singe annotated cell was visible.</p>
 
 <p><img src="/histpath/images/histpath/many_vs_single_ann.png" alt="" title="FiftyOne dataset visualization" /></p>
 
 <h2 id="training-detection-model">Training detection model</h2>
 
-<p>After solving the downscaling problem and generating a dataset that can be trained upon it is time to move on to selecting a machine learning framework and a model to train. There are multiple options here to go with, initially <a href="https://github.com/FateScript/CenterNet-better">Center-Net</a>, was the model in mind, but due to implementation difficulties <a href="https://pytorch.org/vision/stable/models.html">Pytorch and Faster R-CNN</a> architecture was used.</p>
+<p>After solving the downscaling problem and generating a dataset that can be trained upon it is time to select a machine learning framework and a model to train. There are multiple options here to go with, initially <a href="https://github.com/FateScript/CenterNet-better">Center-Net</a>, was the model in mind, but due to implementation difficulties <a href="https://pytorch.org/vision/stable/models.html">Pytorch and Faster R-CNN</a> architecture was used.</p>
 
 <h3 id="custom-data-loader">Custom data loader</h3>
 
-<p>In order to pass generated dataset to the Pytorch model a custom data loader needs to be implemented. Unfortunately there is a great <a href="https://medium.com/fullstackai/how-to-train-an-object-detector-with-your-own-coco-dataset-in-pytorch-319e7090da5">tutorial</a> how to implement the data loader for a custom COCO dataset. Also the Pytorch has a good boilerplate for detection training scripts that can be found in their <a href="https://github.com/pytorch/vision/tree/master/references/detection">github repo</a>. Combining these two great sources allowed to write the training script more easily.</p>
+<p>To pass generated dataset to the Pytorch model a custom data loader needs to be implemented. Unfortunately there is a great <a href="https://medium.com/fullstackai/how-to-train-an-object-detector-with-your-own-coco-dataset-in-pytorch-319e7090da5">tutorial</a> how to implement the data loader for a custom COCO dataset. Also the Pytorch has a good boilerplate for detection training scripts found in their <a href="https://github.com/pytorch/vision/tree/master/references/detection">github repo</a>. So combining these two great sources allowed to write the training script more easily.</p>
 
 <h3 id="augmentations">Augmentations</h3>
 
-<p>Detection task needs a little more work than classification task when it comes to image augmentation as the original bounding boxes on images also need to shift and follow the augmented image corresponding sections, so that they also match the cell after augmentation. As the annotation was considered on the image if the annotation center point was on the selected tile, then the bounding boxes shape also need to be limited by the border of the image.</p>
+<p>Detection task needs a little more work than classification task when it comes to image augmentation. The original bounding boxes on images also need to shift and follow the augmented image corresponding sections to match the cell after augmentation. Furthermore, as the annotation was considered on the image if the annotation center point was on the selected tile, then the bounding boxes shape also need to be limited by the image’s border.</p>
 
 <p><img src="/histpath/images/histpath/limit_bboxes.png" alt="" title="Cutting excessive bounding boxes" /></p>
 
@@ -190,45 +190,35 @@ window.onload = wrap_img;
 
 <h3 id="using-images-from-different-levels">Using images from different levels</h3>
 
-<p>After implementing the first model with only level 1 (the layer with largest dimensions) images it seemed that the model might improve by seeing cells from different height as human does when annotating different cell types. The level 1 image might provide higher details on how the exact cell looks and how to distinguish between different cells, but the higher level images might provide overview regarding cell positioning, detection etc.</p>
+<p>After implementing the first model with only level 1 (the layer with largest dimensions) images, the model might improve by seeing cells from different heights as humans do when annotating different cell types. The level 1 image might provide more essential details on how the exact cell looks and how to distinguish it from other cells. However, the higher-level images might provide an overview regarding cell positioning, detection, etc.</p>
 
 <p><img src="/histpath/images/histpath/scaling_layers.png" alt="" title="Images from different levels" /></p>
 
-<p>Taking images from different levels meant also that the bounding boxes of level 1 annotations needed to be scaled accordingly. As each level were scaled to cover twice the dimension of previous level, then using images above level 3 seemed to be not effective as the annotations got smaller and smaller.</p>
+<p>Taking images from different layers also meant that the bounding boxes for layer one needed to be scaled accordingly. As each level was scaled to cover twice the dimension of the previous one, then using images above level 3 seemed to be ineffective as the annotations got smaller and smaller.</p>
 
 <h2 id="validation">Validation</h2>
 
 <h3 id="eliminating-predictions">Eliminating predictions</h3>
 
-<p>Non-Max Suppression is a technique to filter the predictions of object detections. The idea of the Non-Max Suppression is to keep the highest scoring bounding box for a single detection. The IOU (intersection over union) of two bounding boxes is calculated to determine the boxes that overlap and lowest scoring boxes are dropped. This can reduce the predictions noise quite a lot as can be seen in the following image.</p>
+<p>Non-Max Suppression is a technique to filter the predictions of object detections. The idea of the Non-Max Suppression is to keep the highest-scoring bounding box for a single detection. The IOU (intersection over union) of two bounding boxes is calculated to determine if the boxes overlap and the lowest scoring boxes are dropped. This method can reduce the prediction noise quite a lot, as seen in the following image.</p>
 
 <p><img src="/histpath/images/histpath/supression_vs_none.png" alt="" title="Using non-max suppression" /></p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>TODO:
-Mainly, I have to improve model performance.
-Current issues:
-- model detects cells very well but can't distinguish between different types
-- The slides are not fully annotated and only some cells on the slides are.
-  This creates a situation where cells are found, but as all of them are not annotated
-  they are considered falsy. This allows model to find cells but not distinguish
-  between different types.
-</code></pre></div></div>
+<h2 id="current-issue-with-annotations">Current issue with annotations</h2>
+
+<p>The model doesn’t perform too well because of the current annotation logic. The slides are not fully annotated, and only some cells on the sampled images have labels. While collecting tiles, some cells on an image have annotation, and some don’t. Two visually identical cells can be side by side, but only one of them, a labeled one, is considered a detection, and an unlabeled cell is considered noise. This behavior allows the model to find cells but not to distinguish between different types.</p>
+
+<p><img src="/histpath/images/histpath/ground_truth_vs_predictions.png" alt="" title="Finding cells that are not annotated" /></p>
+
+<p>The solution might be to create a slide or a region that has all of the correct cells annotated and use this slide for training.</p>
 
 <h2 id="conclusion">Conclusion</h2>
 
-<p>There is lot of work before training the neural network model. Data comes in all sorts of different formats and the preprocessing takes most of the time. Also the job isn’t finished when you have reached the model training phase, there is always room for improvement. Otherwise, lots of new knowledge with WSI, Pytorch, Python, FastPages, using HPC Cluster etc.</p>
+<p>There is a lot of work before training the neural network model. Data comes in different formats, and the preprocessing takes most of the time. Also, the job isn’t finished when you have reached the model training phase. So there is always room for improvement. Otherwise, lots of new knowledge with WSI, Pytorch, Python, FastPages, using HPC Cluster, etc.</p>
 
 <p>Source Code available in:
 <a href="https://github.com/sinukaarel/histpath-data">GitHub</a>
 <img src="/histpath/images/histpath/qrcode.png" alt="" /></p>
-
-<p>Some Good Resources:</p>
-
-<ul>
-  <li>Downscaling whole-slide images in Python <a href="https://developer.ibm.com/technologies/data-science/articles/an-automatic-method-to-identify-tissues-from-big-whole-slide-images-pt1/">link</a></li>
-  <li>Use tiling and generate smaller images where the sample occupying atleast 90% of the area <a href="https://web.stanford.edu/group/rubinlab/pubs/2243353.pdf">link</a></li>
-  <li>Deephistopath <a href="https://github.com/CODAIT/deep-histopath">link</a></li>
-</ul>
 
   </div><a class="u-url" href="/histpath/histopathology/2020/01/21/histpath.html" hidden></a>
 </article>
